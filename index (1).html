@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Ami Training 🧜‍♀️</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sirena" />
+  <meta name="theme-color" content="0a0a0a" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Shark SVG favicon inline via data URI -->
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="icon" href="icon.png" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080808;
+      --bg2: #0f0f0f;
+      --bg3: #111;
+      --border: #1a1a1a;
+      --text: #f0ede8;
+      --muted: #666;
+      --faint: #333;
+    }
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Georgia', 'Times New Roman', serif;
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    #bottom-nav {
+      position: fixed;
+      bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px;
+      background: #0f0f0f;
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-btn {
+      flex: 1; border: none; background: none; cursor: pointer;
+      padding: 12px 6px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      color: var(--muted); font-family: 'Georgia', serif;
+      transition: color 0.2s;
+    }
+    .nav-btn.active { color: var(--accent, #5dba7f); }
+    .nav-btn span { font-size: 20px; }
+    .nav-btn small { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; font-family: monospace; }
+
+    /* ── PAGES ── */
+    .page { display: none; padding-bottom: 90px; }
+    .page.active { display: block; }
+
+    /* ── HEADER ── */
+    .page-header {
+      padding: 28px 22px 18px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+    .eyebrow { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-family: monospace; }
+    .page-header h1 { font-size: 22px; font-weight: 700; }
+    .page-header p { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .card.accent-border { border-color: var(--accent, #5dba7f); border-opacity: 0.4; }
+    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .card-sub { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+
+    /* ── TAGS ── */
+    .tag {
+      display: inline-block;
+      font-size: 9px; font-family: monospace; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 20px;
+    }
+    .tag-nuevo { background: var(--accent, #5dba7f); color: #000; }
+    .tag-info { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--muted); }
+
+    /* ── BADGE ROW ── */
+    .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .badge {
+      font-size: 11px; padding: 4px 10px; border-radius: 20px;
+      border: 1px solid var(--border); color: #ccc;
+      background: rgba(255,255,255,0.04);
+    }
+    .badge.accent { background: rgba(255,255,255,0.08); border-color: var(--accent, #5dba7f); color: var(--accent, #5dba7f); }
+
+    /* ── SCROLL PILLS (días) ── */
+    #dias-scroll {
+      display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+      padding: 12px 16px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+    #dias-scroll::-webkit-scrollbar { display: none; }
+    .dia-pill {
+      flex-shrink: 0; width: 54px; height: 66px;
+      border: 2px solid var(--border); border-radius: 12px;
+      background: var(--bg3); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      transition: all 0.2s;
+    }
+    .dia-pill.active { background: rgba(255,255,255,0.05); }
+    .dia-pill span { font-size: 18px; }
+    .dia-pill small { font-size: 9px; font-family: monospace; font-weight: 700; letter-spacing: 1px; color: var(--muted); }
+    .dia-pill.active small { color: var(--accent, #5dba7f); }
+
+    /* ── SUB TABS ── */
+    .sub-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg2); }
+    .sub-tab {
+      flex: 1; padding: 12px; border: none; background: none; cursor: pointer;
+      font-size: 13px; font-family: 'Georgia', serif;
+      color: var(--muted); border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .sub-tab.active { font-weight: 700; border-bottom-color: var(--accent, #5dba7f); color: var(--accent, #5dba7f); }
+
+    /* ── EJERCICIO ROW ── */
+    .ej-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .ej-row:last-child { border-bottom: none; }
+    .ej-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent, #5dba7f); flex-shrink: 0; transition: transform 0.2s; }
+    .ej-row.done .ej-dot { background: var(--muted); }
+    .ej-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--faint); background: transparent; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .ej-row.done .ej-check { background: var(--accent, #5dba7f); border-color: var(--accent, #5dba7f); }
+    .ej-text { font-size: 13px; color: #ccc; flex: 1; }
+    .ej-row.done .ej-text { color: var(--muted); text-decoration: line-through; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { background: var(--border); border-radius: 4px; height: 4px; margin: 14px 0; }
+    .progress-bar { height: 4px; border-radius: 4px; background: var(--accent, #5dba7f); transition: width 0.4s ease; }
+
+    /* ── DIETA ── */
+    .dieta-item { border-left: 2px solid rgba(255,255,255,0.1); padding-left: 10px; margin-bottom: 6px; font-size: 13px; color: #888; }
+
+    /* ── MACROS ROW ── */
+    .macros-row { display: flex; gap: 8px; margin-top: 14px; }
+    .macro-box { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px; padding: 8px 4px; text-align: center; }
+    .macro-val { font-size: 15px; font-weight: 700; }
+    .macro-label { font-size: 9px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; font-family: monospace; }
+
+    /* ── FUERZA PAGE ── */
+    .fuerza-tabs { display: flex; overflow-x: auto; scrollbar-width: none; background: var(--bg2); border-bottom: 1px solid var(--border); }
+    .fuerza-tab { flex-shrink: 0; padding: 12px 16px; border: none; background: none; cursor: pointer; font-size: 12px; font-family: 'Georgia', serif; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
+    .fuerza-tab.active { font-weight: 700; color: var(--accent, #5dba7f); border-bottom-color: var(--accent, #5dba7f); }
+
+    /* ── MITO CARD ── */
+    .mito { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+    .mito-q { font-size: 13px; color: #555; font-style: italic; margin-bottom: 8px; }
+    .mito-a { font-size: 13px; color: #ccc; line-height: 1.6; }
+
+    /* ── SEMANA HEADER ── */
+    .dia-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+    .kcal-box { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; text-align: center; }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 32px 16px; }
+    .empty-emoji { font-size: 40px; margin-bottom: 12px; }
+    .empty-title { font-size: 14px; color: var(--muted); }
+    .empty-sub { font-size: 12px; color: var(--faint); margin-top: 6px; line-height: 1.6; }
+
+    section.content { padding: 18px 22px 10px; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     PAGE: SEMANA
+══════════════════════════════════════ -->
+<div id="page-semana" class="page active">
+  <div class="page-header">
+    <div class="eyebrow">Semana Completa</div>
+    <h1>Tri + Fuerza + Nutrición 🧜‍♀️</h1>
+    <p>Toca cada día para ver tu plan completo</p>
+  </div>
+
+  <div id="dias-scroll"></div>
+
+  <div id="dia-header-content" class="dia-header"></div>
+
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="setSubTab('entreno')" id="tab-entreno">🏋️ Entreno</button>
+    <button class="sub-tab" onclick="setSubTab('dieta')" id="tab-dieta">🍽️ Dieta</button>
+  </div>
+
+  <section class="content" id="semana-entreno-content"></section>
+  <section class="content" id="semana-dieta-content" style="display:none"></section>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: FUERZA
+══════════════════════════════════════ -->
+<div id="page-fuerza" class="page">
+  <div class="page-header">
+    <div class="eyebrow">Plan de Fuerza · 4 días/semana</div>
+    <h1>Fuerza para Triatlón 💪</h1>
+    <p>Sin sentadillas · Énfasis glúteos, core y estabilidad · Palomea cada ejercicio</p>
+  </div>
+
+  <div class="fuerza-tabs" id="fuerza-tabs"></div>
+  <section class="content" id="fuerza-content"></section>
+
+  <section class="content">
+    <div class="eyebrow" style="margin-bottom:12px">Progresión · 4 Semanas</div>
+    <div id="progresion-content"></div>
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: NUTRICIÓN
+══════════════════════════════════════ -->
+<div id="page-nutricion" class="page">
+  <div class="page-header">
+    <div class="eyebrow">Nutrición · Recomposición</div>
+    <h1>Hacia Barbara 🔥</h1>
+    <p>52.7 kg · 27.5% grasa → meta ~22–24% · Músculo 18.7 → 19.5+ kg</p>
+    <div class="macros-row">
+      <div class="macro-box" id="m-kcal"><div class="macro-val" style="color:#5dba7f">—</div><div class="macro-label">Kcal</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#5dba7f">130g</div><div class="macro-label">Proteína</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#5dba7f">—</div><div class="macro-label" id="m-carbs-label">Carbos</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#5dba7f">55g</div><div class="macro-label">Grasa</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button onclick="setDietaMode('gym')" id="btn-gym" class="nav-btn active" style="flex:1;border:1px solid #1a1a1a;border-radius:8px;padding:10px;font-family:Georgia,serif;font-size:12px;color:#5dba7f;background:#0f1a0f;">Día de Gym 💪</button>
+      <button onclick="setDietaMode('descanso')" id="btn-descanso" class="nav-btn" style="flex:1;border:1px solid #1a1a1a;border-radius:8px;padding:10px;font-family:Georgia,serif;font-size:12px;color:#666;background:#0f0f0f;">Día de Descanso 🧘</button>
+    </div>
+  </div>
+
+  <section class="content" id="nutricion-content"></section>
+
+  <section class="content">
+    <div class="eyebrow" style="margin-bottom:12px">Por qué no vas a engordar</div>
+    <div id="mitos-content"></div>
+  </section>
+</div>
+
+<!-- ── BOTTOM NAV ── -->
+<nav id="bottom-nav">
+  <button class="nav-btn active" onclick="setPage('semana')" id="nav-semana">
+    <span>📅</span><small>Semana</small>
+  </button>
+  <button class="nav-btn" onclick="setPage('fuerza')" id="nav-fuerza">
+    <span>💪</span><small>Fuerza</small>
+  </button>
+  <button class="nav-btn" onclick="setPage('nutricion')" id="nav-nutricion">
+    <span>🍽️</span><small>Nutrición</small>
+  </button>
+</nav>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const SEMANA = [
+  { dia:"Lunes", short:"LUN", emoji:"💪", tri:null, fuerza:1, dieta:"gym", accent:"#5dba7f", bg:"#0a1a0f", nota:"Día de arranque. Fuerza primero, cuerpo fresco." },
+  { dia:"Martes", short:"MAR", emoji:"🏃", tri:"Correr 🏃", fuerzaNote:"Sin fuerza — rodilla descansa post-run.", fuerza:null, dieta:"gym", accent:"#e0a04f", bg:"#1a0f00", nota:"Solo correr. Nada de fuerza — prioridad rodilla." },
+  { dia:"Miércoles", short:"MIÉ", emoji:"🚴💪", tri:"Bici 🚴", fuerzaNote:"Bici no fatiga tren superior — perfecto para brazos.", fuerza:2, dieta:"gym", accent:"#4f9cf9", bg:"#050f1a", nota:"Bici en la mañana + tren superior en el gym. No se pisan." },
+  { dia:"Jueves", short:"JUE", emoji:"🏊💪", tri:"Nadar 🏊", fuerzaNote:"Natación no carga piernas — ok combinar con fuerza.", fuerza:3, dieta:"gym", accent:"#9b7fe8", bg:"#080514", nota:"Nado primero, gym después. Piernas trabajan diferente en agua." },
+  { dia:"Viernes", short:"VIE", emoji:"🚴", tri:"Bici 🚴", fuerzaNote:"Solo bici. Descanso de fuerza antes del sábado.", fuerza:null, dieta:"descanso", accent:"#e06060", bg:"#1a0505", nota:"Recuperación activa. El cuerpo reconstruye mientras descansas." },
+  { dia:"Sábado", short:"SÁB", emoji:"🧘💪", tri:null, fuerza:4, dieta:"gym", accent:"#c8b84f", bg:"#141200", nota:"Sesión suave con movilidad y foam rolling. El más importante para la rodilla." },
+  { dia:"Domingo", short:"DOM", emoji:"🏃", tri:"Correr 🏃", fuerzaNote:"Carrera de cierre. Sin fuerza — recuperación total.", fuerza:null, dieta:"descanso", accent:"#4fbfbf", bg:"#001414", nota:"Carrera suave y descanso. Prepara la siguiente semana." },
+];
+
+const FUERZA_DIAS = [
+  { num:1, nombre:"Glúteos & Cadena Posterior", lugar:"🏠 Casa / Bandas", accent:"#5dba7f",
+    ejercicios:[
+      { n:"Hip Thrust con banda", s:"4x15", nota:"Pausa 2s arriba. Empuja con talones." },
+      { n:"Romanian Deadlift (mancuernas)", s:"3x12", nota:"Bisagra de cadera limpia, rodillas suaves." },
+      { n:"Clamshell con banda", s:"3x20 c/lado", nota:"Lento y controlado, sin rotar la pelvis." },
+      { n:"Side-lying hip abduction", s:"3x15 c/lado", nota:"IT band friendly. Sin levantar cadera." },
+      { n:"Bird Dog", s:"3x12 c/lado", nota:"Core activado, columna neutra." },
+      { n:"Plancha frontal", s:"3x40s", nota:"Activa glúteos y abdomen al mismo tiempo." },
+    ]
+  },
+  { num:2, nombre:"Tren Superior & Core", lugar:"🏋️ Gym", accent:"#4f9cf9",
+    ejercicios:[
+      { n:"Press de banca / mancuernas", s:"4x10", nota:"Escápulas retraídas, movimiento controlado." },
+      { n:"Remo con mancuernas", s:"4x10", nota:"Codo pegado al cuerpo, squeeze al final." },
+      { n:"Press militar (mancuernas)", s:"3x12", nota:"No arquear la espalda baja." },
+      { n:"Jalón al pecho (polea)", s:"3x12", nota:"Pecho arriba, jala con los codos." },
+      { n:"Face pull con banda/polea", s:"3x15", nota:"Rotadores externos — clave para natación." },
+      { n:"Dead bug", s:"3x10 c/lado", nota:"Zona lumbar pegada al piso todo el tiempo." },
+      { n:"Pallof press", s:"3x12 c/lado", nota:"Anti-rotación. Core profundo." },
+    ]
+  },
+  { num:3, nombre:"Piernas sin impacto & Estabilidad", lugar:"🏋️ Gym", accent:"#9b7fe8",
+    ejercicios:[
+      { n:"Leg press (rango parcial)", s:"4x12", nota:"Sin dolor en rodilla. El rango que permita." },
+      { n:"Hip Thrust en máquina/barra", s:"4x12", nota:"Carga progresiva vs Día 1." },
+      { n:"Step-up lateral (bajo)", s:"3x10 c/lado", nota:"Solo si la rodilla lo permite. Sin dolor." },
+      { n:"Terminal knee extension (TKE)", s:"3x20 c/lado", nota:"Rehab IT band + cuádriceps." },
+      { n:"Curl de isquiotibiales acostada", s:"3x12", nota:"Lento en la bajada (3 cuentas)." },
+      { n:"Extensión de cadera en polea baja", s:"3x15 c/lado", nota:"Glúteo mayor. Sin compensar con lumbar." },
+      { n:"Plancha lateral", s:"3x30s c/lado", nota:"Abductor medio — clave para IT band." },
+    ]
+  },
+  { num:4, nombre:"Full Body Funcional & Movilidad", lugar:"🏠 Casa / Pilates", accent:"#c8b84f",
+    ejercicios:[
+      { n:"Hip hinge con banda", s:"3x15", nota:"Patrón de movimiento limpio." },
+      { n:"Pushup (flexión de pecho)", s:"3x12", nota:"Variante inclinada si más cómodo." },
+      { n:"Superman hold", s:"3x12", nota:"Extensión cadera y espalda. 2s arriba." },
+      { n:"Donkey kicks con banda", s:"3x20 c/lado", nota:"Glúteo máximo. No arquear." },
+      { n:"Estiramiento hip flexor kneeling", s:"3x45s c/lado", nota:"IT band y movilidad de cadera." },
+      { n:"Foam roller IT band + cuádriceps", s:"5 min", nota:"Rodea la zona, no directo en IT band." },
+      { n:"Respiración diafragmática", s:"5 min", nota:"Recuperación del sistema nervioso." },
+    ]
+  },
+];
+
+const PROGRESION = [
+  { sem:"Sem 1", foco:"Técnica", desc:"Peso moderado. Aprende los patrones. Prioriza forma perfecta." },
+  { sem:"Sem 2", foco:"+ Volumen", desc:"Agrega 1 serie en los ejercicios principales." },
+  { sem:"Sem 3", foco:"+ Carga", desc:"Sube 5–10% de peso donde la forma lo permita." },
+  { sem:"Sem 4", foco:"Descarga", desc:"Reduce volumen 30%. Mantén intensidad. Deja recuperar." },
+];
+
+const DIETA_GYM = [
+  { tiempo:"Desayuno", hora:"7–8 am", items:["4 claras + pimiento + salsa","1 tortilla de maíz","Shake proteína + plátano + creatina"], nuevo:false, kcal:430, nota:"Sin cambios — está perfecto 🙌" },
+  { tiempo:"Pre-entreno", hora:"30 min antes del gym", items:["½ plátano o 1 dátil","Café americano (opcional)"], nuevo:true, kcal:60, nota:"Energía rápida. Lo quemas en el calentamiento." },
+  { tiempo:"Post-entreno", hora:"Inmediato después", items:["½ taza arroz o avena cocida","100 g pollo o atún"], nuevo:true, kcal:280, nota:"Aquí el carbo va directo al músculo, no a grasa." },
+  { tiempo:"Comida", hora:"2–3 pm", items:["150 g pollo asado","Ensalada + aguacate + limón","Serving de papa horneada"], nuevo:false, kcal:520, nota:"Sin cambios — bien balanceada ✅" },
+  { tiempo:"Cena", hora:"7–8 pm", items:["Atún + jitomate + cebolla + aguacate + Maggi","½ taza arroz o 1 rebanada pan integral"], nuevo:true, kcal:380, nota:"Carbo nocturno = recuperación muscular mientras duermes." },
+];
+
+const DIETA_DESCANSO = [
+  { tiempo:"Desayuno", hora:"7–8 am", items:["4 claras + pimiento + salsa","1 tortilla de maíz","Shake proteína + plátano + creatina"], nuevo:false, kcal:430, nota:"Igual que siempre ✅" },
+  { tiempo:"Comida", hora:"1–2 pm", items:["150 g pollo asado","Ensalada grande + aguacate","Papa pequeña (opcional)"], nuevo:false, kcal:460, nota:"Día tranquilo = un poco menos de carbo está bien." },
+  { tiempo:"Cena", hora:"7–8 pm", items:["Atún + jitomate + cebolla + aguacate + Maggi","Sin carbo extra — el aguacate da las grasas"], nuevo:false, kcal:290, nota:"Cena ligera en días sin entreno." },
+];
+
+const MITOS = [
+  { q:"\"Si como más voy a engordar\"", a:"Engordar = comer más calorías de las que gastas crónicamente. Un pre-entreno de 60 kcal que vas a quemar en el gym no cuenta." },
+  { q:"\"Los carbos en la noche engordan\"", a:"El cuerpo no tiene reloj. Lo que importa es el total del día. En recuperación post-gym, los carbos nocturnos van al músculo." },
+  { q:"\"Poco ejercicio = tengo que comer menos\"", a:"Tu cuerpo necesita proteína y energía para construir músculo incluso en reposo. Comer poco frena la recomposición." },
+];
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let currentPage = 'semana';
+let currentDia = 0;
+let currentSubTab = 'entreno';
+let currentFuerza = 0;
+let currentDietaMode = 'gym';
+let checked = {}; // fuerza checks
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function setPage(p) {
+  currentPage = p;
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  document.getElementById('nav-' + p).classList.add('active');
+  document.getElementById('nav-' + p).style.setProperty('--accent', getAccentForPage(p));
+}
+
+function getAccentForPage(p) {
+  if (p === 'semana') return SEMANA[currentDia].accent;
+  if (p === 'fuerza') return FUERZA_DIAS[currentFuerza].accent;
+  return '#5dba7f';
+}
+
+function setSubTab(t) {
+  currentSubTab = t;
+  document.getElementById('semana-entreno-content').style.display = t === 'entreno' ? 'block' : 'none';
+  document.getElementById('semana-dieta-content').style.display = t === 'dieta' ? 'block' : 'none';
+  document.getElementById('tab-entreno').classList.toggle('active', t === 'entreno');
+  document.getElementById('tab-dieta').classList.toggle('active', t === 'dieta');
+  const acc = SEMANA[currentDia].accent;
+  document.getElementById('tab-' + t).style.color = acc;
+  document.getElementById('tab-' + t).style.borderBottomColor = acc;
+  const other = t === 'entreno' ? 'dieta' : 'entreno';
+  document.getElementById('tab-' + other).style.color = '';
+  document.getElementById('tab-' + other).style.borderBottomColor = 'transparent';
+}
+
+// ══════════════════════════════════════
+// SEMANA
+// ══════════════════════════════════════
+function renderDiasScroll() {
+  const el = document.getElementById('dias-scroll');
+  el.innerHTML = SEMANA.map((d, i) => `
+    <button class="dia-pill ${i === currentDia ? 'active' : ''}" onclick="selectDia(${i})"
+      style="${i === currentDia ? `border-color:${d.accent}` : ''}">
+      <span>${d.emoji.slice(0,2)}</span>
+      <small style="${i === currentDia ? `color:${d.accent}` : ''}">${d.short}</small>
+    </button>
+  `).join('');
+}
+
+function selectDia(i) {
+  currentDia = i;
+  renderDiasScroll();
+  renderDiaHeader();
+  renderSemanaEntreno();
+  renderSemanaDieta();
+  setSubTab('entreno');
+}
+
+function renderDiaHeader() {
+  const d = SEMANA[currentDia];
+  const kcal = d.dieta === 'gym' ? '~1,750' : '~1,550';
+  document.getElementById('dia-header-content').style.background = d.bg;
+  document.getElementById('dia-header-content').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <h2 style="font-size:22px;font-weight:700;color:${d.accent}">${d.dia}</h2>
+        <p style="font-size:12px;color:#888;margin-top:5px;line-height:1.5;max-width:240px">${d.nota}</p>
+      </div>
+      <div class="kcal-box">
+        <div style="font-size:14px;font-weight:700;color:${d.accent};font-family:monospace">${kcal}</div>
+        <div style="font-size:9px;color:#555;letter-spacing:1px;text-transform:uppercase">kcal</div>
+      </div>
+    </div>
+    <div class="badge-row">
+      ${d.tri ? `<span class="badge">${d.tri}</span>` : ''}
+      ${d.fuerza ? `<span class="badge accent" style="border-color:${d.accent};color:${d.accent}">Día ${d.fuerza} Fuerza</span>` : ''}
+      ${!d.tri && !d.fuerza ? `<span class="badge">Descanso total</span>` : ''}
+    </div>
+  `;
+}
+
+function renderSemanaEntreno() {
+  const d = SEMANA[currentDia];
+  let html = '';
+  if (d.tri) {
+    html += `<div class="card">
+      <div class="card-title">Sesión Triatlón</div>
+      <div style="font-size:16px;margin-bottom:8px">${d.tri}</div>
+      ${d.fuerzaNote && !d.fuerza ? `<div style="font-size:12px;color:#666;line-height:1.6">💡 ${d.fuerzaNote}</div>` : ''}
+    </div>`;
+  }
+  if (d.fuerza) {
+    const fd = FUERZA_DIAS[d.fuerza - 1];
+    const doneCount = fd.ejercicios.filter((_, j) => checked[`${d.fuerza}-${j}`]).length;
+    html += `<div class="card" style="border-color:${fd.accent}40">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="card-title" style="color:${fd.accent}">Día ${fd.num} — ${fd.nombre}</div>
+          <div class="card-sub">${fd.lugar}</div>
+        </div>
+        <div style="text-align:center;background:${fd.accent}15;border:1px solid ${fd.accent}30;border-radius:8px;padding:6px 10px">
+          <div style="font-size:16px;font-weight:700;color:${fd.accent}">${doneCount}/${fd.ejercicios.length}</div>
+          <div style="font-size:9px;color:#555;letter-spacing:1px">listos</div>
+        </div>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${(doneCount/fd.ejercicios.length)*100}%;background:${fd.accent}"></div></div>
+      ${fd.ejercicios.map((e, j) => `
+        <div class="ej-row ${checked[`${d.fuerza}-${j}`] ? 'done' : ''}" onclick="toggleCheck(${d.fuerza},${j})" style="--accent:${fd.accent}">
+          <div class="ej-check">${checked[`${d.fuerza}-${j}`] ? '<span style="color:#000;font-size:11px;font-weight:700">✓</span>' : ''}</div>
+          <div style="flex:1">
+            <div class="ej-text">${e.n}</div>
+            <div style="font-size:11px;color:#555;margin-top:2px;font-family:monospace">${e.s}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+  if (!d.tri && !d.fuerza) {
+    html = `<div class="empty"><div class="empty-emoji">😴</div><div class="empty-title">Día de descanso completo</div><div class="empty-sub">El músculo crece cuando descansas,<br>no cuando entrenas.</div></div>`;
+  }
+  document.getElementById('semana-entreno-content').innerHTML = html;
+}
+
+function toggleCheck(diaNum, ejIdx) {
+  const key = `${diaNum}-${ejIdx}`;
+  checked[key] = !checked[key];
+  renderSemanaEntreno();
+}
+
+function renderSemanaDieta() {
+  const d = SEMANA[currentDia];
+  const dieta = d.dieta === 'gym' ? DIETA_GYM : DIETA_DESCANSO;
+  const acc = d.accent;
+  const label = d.dieta === 'gym' ? `Día de gym · ~1,750 kcal` : `Día de descanso · ~1,550 kcal`;
+  let html = `<div style="margin-bottom:14px"><span class="tag" style="background:${acc}20;color:${acc};border:1px solid ${acc}40;letter-spacing:1px">${label}</span></div>`;
+  html += dieta.map(c => `
+    <div class="card" style="${c.nuevo ? `border-color:${acc}50` : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <span style="font-size:14px;font-weight:700">${c.tiempo}</span>
+          <span style="font-size:11px;color:#555;margin-left:8px">${c.hora}</span>
+        </div>
+        ${c.nuevo ? `<span class="tag tag-nuevo" style="background:${acc};color:#000">NUEVO</span>` : ''}
+      </div>
+      ${c.items.map(item => `<div class="dieta-item" style="border-left-color:${acc}40">${item}</div>`).join('')}
+      <div style="margin-top:10px;font-size:12px;color:${acc};background:${acc}10;padding:8px 10px;border-radius:6px;line-height:1.5">💡 ${c.nota}</div>
+    </div>
+  `).join('');
+  html += `<div style="background:#0f0f0f;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:4px;font-size:11px;color:#444;line-height:1.6">☕ Café entre comidas está bien — sin azúcar o con leche vegetal.</div>`;
+  document.getElementById('semana-dieta-content').innerHTML = html;
+}
+
+// ══════════════════════════════════════
+// FUERZA
+// ══════════════════════════════════════
+function renderFuerzaTabs() {
+  document.getElementById('fuerza-tabs').innerHTML = FUERZA_DIAS.map((d, i) => `
+    <button class="fuerza-tab ${i === currentFuerza ? 'active' : ''}" onclick="selectFuerza(${i})"
+      style="${i === currentFuerza ? `color:${d.accent};border-bottom-color:${d.accent}` : ''}">
+      Día ${d.num} — ${d.nombre.split(' ')[0]}
+    </button>
+  `).join('');
+}
+
+function selectFuerza(i) {
+  currentFuerza = i;
+  renderFuerzaTabs();
+  renderFuerzaContent();
+}
+
+function renderFuerzaContent() {
+  const fd = FUERZA_DIAS[currentFuerza];
+  const doneCount = fd.ejercicios.filter((_, j) => checked[`f${fd.num}-${j}`]).length;
+  document.getElementById('fuerza-content').innerHTML = `
+    <div class="card" style="border-color:${fd.accent}40">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="card-title" style="color:${fd.accent}">Día ${fd.num} — ${fd.nombre}</div>
+          <div class="card-sub">${fd.lugar}</div>
+        </div>
+        <div style="text-align:center;background:${fd.accent}15;border:1px solid ${fd.accent}30;border-radius:8px;padding:6px 10px">
+          <div style="font-size:16px;font-weight:700;color:${fd.accent}">${doneCount}/${fd.ejercicios.length}</div>
+          <div style="font-size:9px;color:#555;letter-spacing:1px">listos</div>
+        </div>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${(doneCount/fd.ejercicios.length)*100}%;background:${fd.accent}"></div></div>
+      ${fd.ejercicios.map((e, j) => `
+        <div class="ej-row ${checked[`f${fd.num}-${j}`] ? 'done' : ''}" onclick="toggleFuerzaCheck(${fd.num},${j})" style="--accent:${fd.accent}">
+          <div class="ej-check">${checked[`f${fd.num}-${j}`] ? '<span style="color:#000;font-size:11px;font-weight:700">✓</span>' : ''}</div>
+          <div style="flex:1">
+            <div class="ej-text">${e.n}</div>
+            <div style="font-size:11px;color:#555;margin-top:2px">${e.s} · <span style="color:#444">${e.nota}</span></div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('progresion-content').innerHTML = PROGRESION.map((p, i) => `
+    <div style="display:flex;gap:14px;padding:12px 0;${i < 3 ? 'border-bottom:1px solid var(--border)' : ''}">
+      <div style="flex-shrink:0;width:60px">
+        <div style="font-size:11px;font-family:monospace;color:${fd.accent};font-weight:700">${p.sem}</div>
+        <div style="font-size:10px;color:#555;margin-top:2px">${p.foco}</div>
+      </div>
+      <div style="font-size:13px;color:#ccc;line-height:1.5">${p.desc}</div>
+    </div>
+  `).join('');
+}
+
+function toggleFuerzaCheck(diaNum, ejIdx) {
+  const key = `f${diaNum}-${ejIdx}`;
+  checked[key] = !checked[key];
+  renderFuerzaContent();
+}
+
+// ══════════════════════════════════════
+// NUTRICIÓN
+// ══════════════════════════════════════
+function setDietaMode(mode) {
+  currentDietaMode = mode;
+  const gymBtn = document.getElementById('btn-gym');
+  const descBtn = document.getElementById('btn-descanso');
+  if (mode === 'gym') {
+    gymBtn.style.color = '#5dba7f'; gymBtn.style.background = '#0f1a0f'; gymBtn.style.borderColor = '#5dba7f';
+    descBtn.style.color = '#666'; descBtn.style.background = '#0f0f0f'; descBtn.style.borderColor = '#1a1a1a';
+    document.getElementById('m-kcal').querySelector('.macro-val').textContent = '1,750';
+    document.getElementById('m-carbs-label').previousElementSibling.textContent = '175g';
+  } else {
+    descBtn.style.color = '#c8b84f'; descBtn.style.background = '#141200'; descBtn.style.borderColor = '#c8b84f';
+    gymBtn.style.color = '#666'; gymBtn.style.background = '#0f0f0f'; gymBtn.style.borderColor = '#1a1a1a';
+    document.getElementById('m-kcal').querySelector('.macro-val').textContent = '1,550';
+    document.getElementById('m-carbs-label').previousElementSibling.textContent = '130g';
+  }
+  renderNutricionContent();
+}
+
+function renderNutricionContent() {
+  const acc = currentDietaMode === 'gym' ? '#5dba7f' : '#c8b84f';
+  const dieta = currentDietaMode === 'gym' ? DIETA_GYM : DIETA_DESCANSO;
+  let html = dieta.map(c => `
+    <div class="card" style="${c.nuevo ? `border-color:${acc}50` : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <span style="font-size:14px;font-weight:700">${c.tiempo}</span>
+          <span style="font-size:11px;color:#555;margin-left:8px">${c.hora}</span>
+        </div>
+        ${c.nuevo ? `<span class="tag" style="background:${acc};color:#000;font-size:9px;padding:2px 8px;border-radius:20px;font-weight:700;font-family:monospace">NUEVO</span>` : ''}
+      </div>
+      ${c.items.map(item => `<div class="dieta-item" style="border-left-color:${acc}40">${item}</div>`).join('')}
+      <div style="margin-top:10px;font-size:12px;color:${acc};background:${acc}10;padding:8px 10px;border-radius:6px;line-height:1.5">💡 ${c.nota}</div>
+    </div>
+  `).join('');
+  html += `<div style="background:#0f0f0f;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11px;color:#444;line-height:1.6">☕ Café entre comidas está bien — sin azúcar o con leche vegetal.</div>`;
+  document.getElementById('nutricion-content').innerHTML = html;
+  document.getElementById('mitos-content').innerHTML = MITOS.map(m => `
+    <div class="mito"><div class="mito-q">${m.q}</div><div class="mito-a">✓ ${m.a}</div></div>
+  `).join('');
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+renderDiasScroll();
+renderDiaHeader();
+renderSemanaEntreno();
+renderSemanaDieta();
+renderFuerzaTabs();
+renderFuerzaContent();
+renderNutricionContent();
+setDietaMode('gym');
+</script>
+</body>
+</html>
